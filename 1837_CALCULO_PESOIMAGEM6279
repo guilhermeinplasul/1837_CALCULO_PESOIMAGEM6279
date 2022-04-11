@@ -1,0 +1,75 @@
+declare 
+  v_empresa number := :p_1;
+  v_produto estitem.codigo%type   := :p_2;
+  v_versao  pcpversao.versao%type := :p_3;
+  v_composicao   varchar2(40);
+  v_proporcao    number;
+  v_largura       number;
+  v_altura        number;
+  v_espessura     number;
+  v_peso_esp      number;
+  valor_largura   number;
+  valor_altura    number;
+  valor_tinta    number;
+  valor_espessura number;
+  valor_passo     number;
+  v_tipo_ficha number(2);
+  valor_peso_esp  number;
+  v_peso          number(20,10);
+  v_retorno       number(20,10);  
+  v_grupo         number;
+
+BEGIN
+
+   select nvl(composicao, '0')
+     into v_composicao
+     from pcpversao
+    where empresa = v_empresa
+      and produto = v_produto
+      and versao  = v_versao;
+
+   select nvl(grupo ,0)
+     into v_grupo
+     from estitem
+    where empresa = v_empresa
+      and codigo = v_produto;
+
+   if v_composicao is not null then
+
+ --  Dbms_Output.Put_Line('aqui');
+     select max(largura), max(altura), max(espessura), max(peso_especifico), max(tipo_ficha) 
+       into v_largura, v_altura, v_espessura, v_peso_esp, v_tipo_ficha
+       from pcpatribflex
+      where empresa = v_empresa
+        and tipo_ficha = (select tipo_ficha
+                            from estitem
+                           where empresa = v_empresa
+                             and codigo = v_produto);
+
+      valor_largura:=replace(nvl(f_busca_valor_ficha(v_empresa, v_produto, v_versao, null, v_largura),0),'.',',');
+      valor_altura:=replace(nvl(f_busca_valor_ficha(v_empresa, v_produto, v_versao, null, v_altura),0),'.',',');
+      valor_tinta:=replace(nvl(f_busca_valor_ficha(v_empresa, v_produto, v_versao, null, 6187),0),'.',','); --gramatura tinta
+      valor_passo:=replace(nvl(f_busca_valor_ficha(v_empresa, v_produto, v_versao, null, 36),0),'.',',');   
+      valor_espessura:=replace(nvl(f_busca_valor_ficha(v_empresa, v_produto, v_versao, null, v_espessura),0),'.',',')*0.0001;
+      valor_peso_esp:=replace(nvl(f_busca_valor_ficha(v_empresa, v_produto, v_versao, null, v_peso_esp),0.95),'.',',');
+
+
+      if v_grupo = 20 then 
+        if valor_peso_esp=0 then valor_peso_esp:=0.95; end if;
+          v_proporcao :=  (valor_largura * valor_altura * valor_espessura * valor_peso_esp); 
+        else 
+          if valor_peso_esp=0 then valor_peso_esp:=0.95; end if;
+          v_proporcao :=  (valor_largura * valor_passo * valor_espessura * valor_peso_esp); 
+      end if;
+      if v_proporcao > 0 and v_grupo= 20 then  
+          v_retorno := (nvl(valor_tinta,1.5)*(valor_largura/100)*(valor_altura/100))   + v_proporcao;
+         elsif v_proporcao > 0  then  
+          v_retorno := (nvl(valor_tinta,1.5)*(valor_largura/100)*(valor_passo/100))   + v_proporcao;
+         else
+           v_retorno := '';
+      end if;
+
+    end if;
+  :p_4 := to_char(round(v_retorno,2));
+
+END;
