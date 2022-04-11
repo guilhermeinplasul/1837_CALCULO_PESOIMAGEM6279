@@ -19,8 +19,8 @@
     v_retorno       NUMBER(20, 10);
     v_grupo         NUMBER;
     
+    
 BEGIN
-
     SELECT Nvl(composicao, '0')
     INTO   v_composicao
     FROM   pcpversao
@@ -80,6 +80,7 @@ BEGIN
                                                       ), 0.95), '.', ',');
 
       
+      -- dbms_output.Put_line('v_largura: ' || v_largura || ' / v_altura: ' || v_altura || ' / valor_passo: ' || valor_passo);
       
       IF v_grupo = 20 THEN
       
@@ -110,7 +111,7 @@ BEGIN
                          
       END IF;
 
-      IF v_proporcao > 0 AND v_grupo = 20 THEN
+      IF v_proporcao > 0 AND v_grupo IN (20,30) THEN
         v_retorno := ( Nvl(valor_tinta, 1.5) * ( valor_largura / 100 ) * (
                        valor_altura / 100 ) ) +
                                               v_proporcao;
@@ -126,4 +127,4 @@ BEGIN
     :p_4 := To_char(Round(v_retorno, 2));
     --dbms_output.Put_line(v_retorno);
     
-END;  
+END; 
