@@ -1,4 +1,26 @@
+ /*
+ 
+  Ticket#2022040664000026
+  Cálculo peso do fardo: Itens sem cálculo automático de fardo. TALVEZ itens FOLHA (Grupo 30) não entram no cálculo
+  - 305229  (N CALCULOU)
+  - 63827   (CALCULOU)
+  
+  Comando 1837 - Atributo 6279 - Peso por Imagem não está preenchido (peso por imagem tbm é automatico)
+  
+  Solução:
+  Comando 1824 - Atributo 6266 - PESO_FARDO
+  
+  305229/1
+  v_largura: 20 / v_altura: 21 / valor_passo: 0
+  35,559
+  
+  63827/00
+  v_largura: 20 / v_altura: 21 / valor_passo: 18,4
+  6,82004832
+ */
+ 
  DECLARE
+ 
     v_empresa       NUMBER := :p_1;
     v_produto       estitem.codigo%type   := :p_2;
     v_versao        pcpversao.versao%type := :p_3;
@@ -80,8 +102,6 @@ BEGIN
                                                       ), 0.95), '.', ',');
 
       
-      -- dbms_output.Put_line('v_largura: ' || v_largura || ' / v_altura: ' || v_altura || ' / valor_passo: ' || valor_passo);
-      
       IF v_grupo = 20 THEN
       
         IF valor_peso_esp = 0 THEN
@@ -127,4 +147,4 @@ BEGIN
     :p_4 := To_char(Round(v_retorno, 2));
     --dbms_output.Put_line(v_retorno);
     
-END; 
+END;  
